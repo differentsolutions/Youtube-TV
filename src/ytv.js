@@ -5,7 +5,7 @@
  * Released under the MIT Licence
  * http://opensource.org/licenses/MIT
  *
- * Github:  
+ * Github:
  * Version: 1.0.0
  */
 /*jslint browser: true, undef:true, unused:true*/
@@ -31,7 +31,7 @@
                     stateChange: noop
                 }
             },
-            
+
             cache = {},
             utils = {
                 events: {
@@ -60,7 +60,7 @@
                 addCSS: function(css){
                     var head = doc.getElementsByTagName('head')[0],
                         style = doc.createElement('style');
-                        style.type = 'text/css';
+                    style.type = 'text/css';
                     if (style.styleSheet){
                         style.styleSheet.cssText = css;
                     } else {
@@ -80,7 +80,7 @@
                 },
                 parentUntil: function(el, attr) {
                     while (el.parentNode) {
-                       if (el.getAttribute && el.getAttribute(attr)){
+                        if (el.getAttribute && el.getAttribute(attr)){
                             return el;
                         }
                         el = el.parentNode;
@@ -89,9 +89,11 @@
                 },
                 ajax: {
                     get: function(url, fn){
+                        console.log(url);
+                        console.log(fn);
                         var handle;
-                        if (win.XMLHttpRequest){ 
-                            handle = new XMLHttpRequest(); 
+                        if (win.XMLHttpRequest){
+                            handle = new XMLHttpRequest();
                         } else {
                             handle = new ActiveXObject("Microsoft.XMLHTTP");
                         }
@@ -105,7 +107,7 @@
                     }
                 },
                 endpoints: {
-                    base: 'http://gdata.youtube.com/',
+                    base: 'https://gdata.youtube.com/',
                     userInfo: function(){
                         return utils.endpoints.base+'feeds/api/users/'+settings.user+'?v=2&alt=json';
                     },
@@ -145,7 +147,9 @@
                     if(settings.fullscreen){
                         settings.element.className += " ytv-full";
                     }
-                    utils.addCSS( '.ytv-list .ytv-active a{border-left-color: '+(settings.accent)+';}' );
+                    if (!win.YTinitialized) {
+                        utils.addCSS( '.ytv-list .ytv-active a{border-left-color: '+(settings.accent)+' !important;}' );
+                    }
                 },
                 playlists: function(res){
                     if(res && res.feed){
@@ -159,18 +163,18 @@
                                 thumb: playlists[i].media$group.media$thumbnail[1].url
                             };
                             list += '<a href="#" data-ytv-playlist="'+(data.plid)+'">';
-                                list += '<div class="ytv-thumb"><div class="ytv-thumb-stroke"></div><img src="'+(data.thumb)+'"></div>';
-                                list += '<span>'+(data.title)+'</span>';
+                            list += '<div class="ytv-thumb"><div class="ytv-thumb-stroke"></div><img src="'+(data.thumb)+'"></div>';
+                            list += '<span>'+(data.title)+'</span>';
                             list += '</a>';
                         }
                         list += '</ul></div>';
-                        
-                        var lh = doc.getElementsByClassName('ytv-list-header')[0],
-                            headerLink = lh.children[0];
+
+                        var lh = doc.getElementById(settings.element.id).getElementsByClassName('ytv-list-header')[0],
+                        headerLink = lh.children[0];
                         headerLink.href="#";
                         headerLink.target="";
                         headerLink.setAttribute('data-ytv-playlist-toggle', 'true');
-                        doc.getElementsByClassName('ytv-list-header')[0].innerHTML += list;
+                        doc.getElementById(settings.element.id).getElementsByClassName('ytv-list-header')[0].innerHTML += list;
                         lh.className += ' ytv-has-playlists';
                     }
                 },
@@ -193,76 +197,79 @@
                                 user.title += ' &middot; '+(data.feed.media$group.media$title.$t);
                             }
                             list += '<div class="ytv-list-header">';
-                                list += '<a href="'+(user.url)+'" target="_blank">';
-                                    list += '<img src="'+(user.thumb)+'">';
-                                    list += '<span>'+(user.title)+' <i class="ytv-arrow down"></i></span>';
-                                list += '</a>';
+                            list += '<a href="'+(user.url)+'" target="_blank">';
+                            list += '<img src="'+(user.thumb)+'">';
+                            list += '<span>'+(user.title)+' <i class="ytv-arrow down"></i></span>';
+                            list += '</a>';
                             list += '</div>';
-                            
+
                             list += '<div class="ytv-list-inner"><ul>';
-                            for(i=0; i<videos.length; i++){
-                                if(videos[i].media$group.yt$duration){
-                                    var video = {
-                                        title: videos[i].title.$t,
-                                        slug: videos[i].media$group.yt$videoid.$t,
-                                        link: videos[i].link[0].href,
-                                        published: videos[i].published.$t,
-                                        rating: videos[i].yt$rating,
-                                        stats: videos[i].yt$statistics,
-                                        duration: (videos[i].media$group.yt$duration.seconds),
-                                        thumb: videos[i].media$group.media$thumbnail[1].url
-                                    };
-                                    
-                                    var date = new Date(null);
-                                    date.setSeconds(video.duration);
-                                    var timeSlots = (date.toTimeString().substr(0, 8)).split(':'),
-                                        time = timeSlots[1] + ':' + timeSlots[2];
-                                    
-                                    var isFirst = '';
-                                    if(first===true){
-                                        isFirst = ' class="ytv-active"';
-                                        first = video.slug;
+
+                            if (videos) {
+                                for(i=0; i<videos.length; i++){
+                                    if(videos[i].media$group.yt$duration){
+                                        var video = {
+                                            title: videos[i].title.$t,
+                                            slug: videos[i].media$group.yt$videoid.$t,
+                                            link: videos[i].link[0].href,
+                                            published: videos[i].published.$t,
+                                            rating: videos[i].yt$rating,
+                                            stats: videos[i].yt$statistics,
+                                            duration: (videos[i].media$group.yt$duration.seconds),
+                                            thumb: videos[i].media$group.media$thumbnail[1].url
+                                        };
+
+                                        var date = new Date(null);
+                                        date.setSeconds(video.duration);
+                                        var timeSlots = (date.toTimeString().substr(0, 8)).split(':'),
+                                            time = timeSlots[1] + ':' + timeSlots[2];
+
+                                        var isFirst = '';
+                                        if(first===true){
+                                            isFirst = ' class="ytv-active"';
+                                            first = video.slug;
+                                        }
+
+                                        list += '<li'+isFirst+'><a href="#" data-ytv="'+(video.slug)+'" class="ytv-clear">';
+                                        list += '<div class="ytv-thumb"><div class="ytv-thumb-stroke"></div><span>'+(time)+'</span><img src="'+(video.thumb)+'"></div>';
+                                        list += '<div class="ytv-content"><b>'+(video.title)+'</b><span class="ytv-views">'+utils.addCommas((video.stats) ? video.stats.viewCount : '0')+' Views</span></div>';
+                                        list += '</a></li>';
                                     }
-                                    
-                                    list += '<li'+isFirst+'><a href="#" data-ytv="'+(video.slug)+'" class="ytv-clear">';
-                                    list += '<div class="ytv-thumb"><div class="ytv-thumb-stroke"></div><span>'+(time)+'</span><img src="'+(video.thumb)+'"></div>';
-                                    list += '<div class="ytv-content"><b>'+(video.title)+'</b><span class="ytv-views">'+utils.addCommas(video.stats.viewCount)+' Views</span></div>';
-                                    list += '</a></li>';
                                 }
                             }
+
                             list += '</ul></div>';
-                            settings.element.innerHTML = '<div class="ytv-relative"><div class="ytv-video"><div id="ytv-video-player"></div></div><div class="ytv-list">'+list+'</div></div>';
-                            
+                            settings.element.innerHTML = '<div class="ytv-relative"><div class="ytv-video" id="ytv-video_'+ settings.element.id + '"><div id="ytv-video-player_'+ settings.element.id + '"></div></div><div class="ytv-list">'+list+'</div></div>';
+
                             action.logic.loadVideo(first, settings.autoplay);
-                            
+
                             if(settings.browsePlaylists){
                                 utils.ajax.get( utils.endpoints.userPlaylists(), prepare.playlists );
                             }
-                            
+
                         });
                     }
                 }
             },
             action = {
-                
+
                 logic: {
-                    
+
                     playerStateChange: function(d){
                         console.log(d);
                     },
-                    
+
                     loadVideo: function(slug, autoplay){
-                        
-                        var house = doc.getElementsByClassName('ytv-video')[0];
-                        house.innerHTML = '<div id="ytv-video-player"></div>';
-                        
-                        cache.player = new YT.Player('ytv-video-player', {
+                        var house = doc.getElementById('ytv-video_'+ settings.element.id);
+                        house.innerHTML = '<div id="ytv-video-player_' + settings.element.id + '"></div>';
+
+                        cache.player = new YT.Player('ytv-video-player_' + settings.element.id, {
                             videoId: slug,
                             events: {
                                 onReady: settings.events.videoReady,
                                 onStateChange: function(e){
                                     if( (e.target.getPlayerState()===0) && settings.chainVideos ){
-                                        var ns = doc.getElementsByClassName('ytv-active')[0].nextSibling,
+                                        var ns = doc.getElementById(settings.element.id).getElementsByClassName('ytv-active')[0].nextSibling,
                                             link = ns.children[0];
                                         link.click();
                                     }
@@ -275,46 +282,46 @@
                                 controls: settings.controls ? 1 : 0,
                                 rel: 0,
                                 showinfo: 0,
-                                iv_load_policy: settings.annotations ? '' : 3, 
+                                iv_load_policy: settings.annotations ? '' : 3,
                                 autoplay: autoplay ? 1 : 0
                             }
                         });
-                        
+
                     }
-                    
+
                 },
-                
+
                 endpoints: {
                     videoClick: function(e){
                         var target = utils.parentUntil(e.target ? e.target : e.srcElement, 'data-ytv');
-                        
+
                         if(target && target.dataset){
-                        
+
                             if(target.dataset.ytv){
-                                
+
                                 // Load Video
                                 utils.events.prevent(e);
-                                
-                                var activeEls = doc.getElementsByClassName('ytv-active'),
+
+                                var activeEls = doc.getElementById(settings.element.id).getElementsByClassName('ytv-active'),
                                     i;
                                 for(i=0; i<activeEls.length; i++){
                                     activeEls[i].className="";
                                 }
                                 target.parentNode.className="ytv-active";
                                 action.logic.loadVideo(target.dataset.ytv, true);
-                                
+
                             }
-                        
+
                         }
                     },
                     playlistToggle: function(e){
                         var target = utils.parentUntil(e.target ? e.target : e.srcElement, 'data-ytv-playlist-toggle');
-                        
+
                         if(target && target.dataset && target.dataset.ytvPlaylistToggle){
-                            
+
                             // Toggle Playlist
                             utils.events.prevent(e);
-                            var lh = doc.getElementsByClassName('ytv-list-header')[0];
+                            var lh = doc.getElementById(settings.element.id).getElementsByClassName('ytv-list-header')[0];
                             if(lh.className.indexOf('ytv-playlist-open')===-1){
                                 lh.className += ' ytv-playlist-open';
                             } else {
@@ -324,17 +331,17 @@
                     },
                     playlistClick: function(e){
                         var target = utils.parentUntil(e.target ? e.target : e.srcElement, 'data-ytv-playlist');
-                        
+
                         if(target && target.dataset && target.dataset.ytvPlaylist){
-                            
+
                             // Load Playlist
                             utils.events.prevent(e);
-                            
+
                             settings.playlist = target.dataset.ytvPlaylist;
                             target.children[1].innerHTML = 'Loading...';
-                            
+
                             utils.ajax.get( utils.endpoints.playlistVids(), function(res){
-                                var lh = doc.getElementsByClassName('ytv-list-header')[0];
+                                var lh = doc.getElementById(settings.element.id).getElementsByClassName('ytv-list-header')[0];
                                 lh.className = lh.className.replace(' ytv-playlist-open', '');
                                 prepare.compileList(res);
                             });
@@ -356,52 +363,59 @@
                     });
                 },
                 bindEvents: function(){
-                    
+
                     utils.events.addEvent( settings.element, 'click', action.endpoints.videoClick );
                     utils.events.addEvent( settings.element, 'click', action.endpoints.playlistToggle );
                     utils.events.addEvent( settings.element, 'click', action.endpoints.playlistClick );
-                    
+
                 }
             },
-            
+
             initialize = function(id, opts){
                 utils.deepExtend(settings, opts);
                 settings.element = (typeof id==='string') ? doc.getElementById(id) : id;
-                if(settings.element && settings.user){
-                    prepare.youtube(function(){
+                if(settings.element && (settings.user || settings.playlist)) {
+                    if (win.YTinitialized) {
                         prepare.build();
                         action.bindEvents();
                         utils.ajax.get( settings.playlist ? utils.endpoints.playlistVids() : utils.endpoints.userVids(), prepare.compileList );
-                    });
-                }
-            };
-            
-            /*
-             * Public
-             */
-            this.destroy = function(){
-                utils.events.removeEvent( settings.element, 'click', action.endpoints.videoClick );
-                utils.events.removeEvent( settings.element, 'click', action.endpoints.playlistToggle );
-                utils.events.removeEvent( settings.element, 'click', action.endpoints.playlistClick );
-                settings.element.className = '';
-                settings.element.innerHTML = '';
-            };
-            this.fullscreen = {
-                state: function(){
-                    return (settings.element.className).indexOf('ytv-full') !== -1;
-                },
-                enter: function(){
-                    if( (settings.element.className).indexOf('ytv-full') === -1 ){
-                        settings.element.className += 'ytv-full';
-                    }
-                },
-                exit: function(){
-                    if( (settings.element.className).indexOf('ytv-full') !== -1 ){
-                        settings.element.className = (settings.element.className).replace('ytv-full', '');
+                    } else {
+                        prepare.youtube(function(){
+                            prepare.build();
+                            action.bindEvents();
+                            utils.ajax.get( settings.playlist ? utils.endpoints.playlistVids() : utils.endpoints.userVids(), prepare.compileList );
+                            win.YTinitialized = true;
+                        });
                     }
                 }
             };
-            
+
+        /*
+         * Public
+         */
+        this.destroy = function(){
+            utils.events.removeEvent( settings.element, 'click', action.endpoints.videoClick );
+            utils.events.removeEvent( settings.element, 'click', action.endpoints.playlistToggle );
+            utils.events.removeEvent( settings.element, 'click', action.endpoints.playlistClick );
+            settings.element.className = '';
+            settings.element.innerHTML = '';
+        };
+        this.fullscreen = {
+            state: function(){
+                return (settings.element.className).indexOf('ytv-full') !== -1;
+            },
+            enter: function(){
+                if( (settings.element.className).indexOf('ytv-full') === -1 ){
+                    settings.element.className += 'ytv-full';
+                }
+            },
+            exit: function(){
+                if( (settings.element.className).indexOf('ytv-full') !== -1 ){
+                    settings.element.className = (settings.element.className).replace('ytv-full', '');
+                }
+            }
+        };
+
         initialize(id, opts);
     };
     if ((typeof module !== 'undefined') && module.exports) {
