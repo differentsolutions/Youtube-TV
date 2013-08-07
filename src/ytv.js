@@ -89,8 +89,6 @@
                 },
                 ajax: {
                     get: function(url, fn){
-                        console.log(url);
-                        console.log(fn);
                         var handle;
                         if (win.XMLHttpRequest){
                             handle = new XMLHttpRequest();
@@ -180,11 +178,16 @@
                 },
                 compileList: function(data){
                     if(data && data.feed){
+
+                        if (settings.playlist && data.feed.author[0].name.$t != '') {
+                            settings.user = data.feed.author[0].name.$t;
+                        }
+
                         utils.ajax.get( utils.endpoints.userInfo(), function(userInfo){
                             var list = '',
                                 user = {
                                     title: userInfo.entry.title.$t,
-                                    url: 'http://youtube.com/user/'+userInfo.entry.yt$username.display,
+                                    url: 'https://youtube.com/user/'+userInfo.entry.yt$username.display,
                                     thumb: userInfo.entry.media$thumbnail.url,
                                     summary: userInfo.entry.summary.$t,
                                     subscribers: userInfo.entry.yt$statistics.subscriberCount,
