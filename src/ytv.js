@@ -168,7 +168,7 @@
                         list += '</ul></div>';
 
                         var lh = doc.getElementById(settings.element.id).getElementsByClassName('ytv-list-header')[0],
-                        headerLink = lh.children[0];
+                            headerLink = lh.children[0];
                         headerLink.href="#";
                         headerLink.target="";
                         headerLink.setAttribute('data-ytv-playlist-toggle', 'true');
@@ -286,7 +286,8 @@
                                 rel: 0,
                                 showinfo: 0,
                                 iv_load_policy: settings.annotations ? '' : 3,
-                                autoplay: autoplay ? 1 : 0
+                                autoplay: autoplay ? 1 : 0,
+                                wmode: 'transparent'
                             }
                         });
 
